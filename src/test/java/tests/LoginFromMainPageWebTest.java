@@ -2,10 +2,12 @@ package tests;
 
 import driver.WebDrivers;
 import io.qameta.allure.Description;
-import io.qameta.allure.junit4.DisplayName;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.extension.ExtendWith;
+import io.restassured.response.Response;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openqa.selenium.WebDriver;
 import pages.LoginPage;
 import pages.MainPage;
@@ -13,15 +15,17 @@ import pages.ProfilePage;
 import api.UserClient;
 import models.User;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
+// Allure для JUnit 5
+@ExtendWith(io.qameta.allure.junit5.AllureJunit5.class)
 public class LoginFromMainPageWebTest {
     private WebDriver driver;
     private UserClient userClient;
-    private User user; // Переименовано из userData
+    private User user;
     private String authToken;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         String browser = System.getProperty("browser", "chrome");
         driver = WebDrivers.getDriver(browser);
@@ -33,11 +37,11 @@ public class LoginFromMainPageWebTest {
 
     private void createTestUser() {
         user = new User("auto_" + System.currentTimeMillis() + "@yandex.ru", "password123", "TestUser");
-        var response = userClient.register(user);
+        Response response = userClient.register(user);
         authToken = response.then().extract().path("accessToken");
     }
 
-    @After
+    @AfterEach
     public void tearDown() {
         if (driver != null) {
             driver.quit();
@@ -53,10 +57,10 @@ public class LoginFromMainPageWebTest {
     public void shouldLoginFromMainPage() {
         LoginPage loginPage = new MainPage(driver).open().goToLogin();
 
-        // ИСПРАВЛЕНО: Теперь login возвращает ProfilePage
+        // ИСПРАВЛЕНО: Теперь login возвращает ProfilePage (согласно LoginPage.java)
         ProfilePage profilePage = loginPage.login(user.getEmail(), user.getPassword()).openProfile();
 
-        // ИСПРАВЛЕНО: Проверяем наличие кнопки выхода в профиле
-        assertTrue("Не удалось войти в аккаунт", profilePage.isLogoutButtonDisplayed());
+        // ИСПРАВЛЕНО: assertTrue(условие, сообщение)
+        assertTrue(profilePage.isLogoutButtonDisplayed(), "Не удалось войти в аккаунт");
     }
 }

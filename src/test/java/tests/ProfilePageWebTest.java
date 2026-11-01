@@ -2,11 +2,12 @@ package tests;
 
 import driver.WebDrivers;
 import io.qameta.allure.Description;
-import io.qameta.allure.junit4.DisplayName;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.extension.ExtendWith;
 import io.restassured.response.Response;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openqa.selenium.WebDriver;
 import pages.LoginPage;
 import pages.MainPage;
@@ -14,8 +15,10 @@ import pages.ProfilePage;
 import api.UserClient;
 import models.User;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
+// Подключаем Allure для JUnit 5
+@ExtendWith(io.qameta.allure.junit5.AllureJunit5.class)
 public class ProfilePageWebTest {
     private WebDriver driver;
     private UserClient userClient;
@@ -23,7 +26,7 @@ public class ProfilePageWebTest {
     private String accessToken;
     private final String browser = System.getProperty("browser", "chrome");
 
-    @Before
+    @BeforeEach
     public void setUp() {
         driver = WebDrivers.getDriver(browser);
         driver.manage().window().maximize();
@@ -38,7 +41,7 @@ public class ProfilePageWebTest {
         accessToken = response.jsonPath().getString("accessToken");
     }
 
-    @After
+    @AfterEach
     public void tearDown() {
         if (driver != null) {
             driver.quit();
@@ -51,6 +54,8 @@ public class ProfilePageWebTest {
     private ProfilePage loginUser() {
         MainPage mainPage = new MainPage(driver).open();
         LoginPage loginPage = mainPage.goToLogin();
+        // Метод login() в LoginPage (JUnit 5 версии) должен возвращать MainPage,
+        // поэтому мы вызываем openProfile() в конце цепочки
         return loginPage.login(user.getEmail(), user.getPassword()).openProfile();
     }
 
@@ -59,8 +64,8 @@ public class ProfilePageWebTest {
     @Description("Проверка перехода авторизованного пользователя в личный кабинет")
     public void shouldOpenProfileFromMain() {
         ProfilePage profilePage = loginUser();
-        // Исправлена опечатка: profileProfile -> profilePage
-        assertTrue("Не удалось войти в аккаунт", profilePage.isLogoutButtonDisplayed());
+        // Исправлен assertTrue: (условие, сообщение)
+        assertTrue(profilePage.isLogoutButtonDisplayed(), "Не удалось войти в аккаунт");
     }
 
     @Test
@@ -69,7 +74,7 @@ public class ProfilePageWebTest {
     public void shouldOpenMainFromProfileByLink() {
         ProfilePage profilePage = loginUser();
         MainPage mainPage = profilePage.openMainPage();
-        assertTrue("Не произошел переход в конструктор", mainPage.isBunsTabActive());
+        assertTrue(mainPage.isBunsTabActive(), "Не произошел переход в конструктор");
     }
 
     @Test
@@ -78,7 +83,7 @@ public class ProfilePageWebTest {
     public void shouldOpenMainFromProfileByLogo() {
         ProfilePage profilePage = loginUser();
         MainPage mainPage = profilePage.openHomePage();
-        assertTrue("Не произошел переход по логотипу в конструктор", mainPage.isBunsTabActive());
+        assertTrue(mainPage.isBunsTabActive(), "Не произошел переход по логотипу в конструктор");
     }
 
     @Test
@@ -87,6 +92,6 @@ public class ProfilePageWebTest {
     public void shouldLogoutFromProfile() {
         ProfilePage profilePage = loginUser();
         LoginPage loginPage = profilePage.goToLogin();
-        assertTrue("Не произошел выход из аккаунта", loginPage.isLoginButtonDisplayed());
+        assertTrue(loginPage.isLoginButtonDisplayed(), "Не произошел выход из аккаунта");
     }
 }

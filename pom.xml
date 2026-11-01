@@ -14,12 +14,12 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
         <selenium.version>4.18.1</selenium.version>
-        <junit.version>4.13.2</junit.version>
+        <junit.jupiter.version>5.10.0</junit.jupiter.version>
         <rest-assured.version>5.3.0</rest-assured.version>
         <allure.version>2.29.1</allure.version>
         <gson.version>2.10.1</gson.version>
-        <surefire.plugin.version>3.0.0</surefire.plugin.version>
-        <allure.maven.version>2.12.0</allure.maven.version>
+        <surefire.plugin.version>3.2.3</surefire.plugin.version>
+        <allure.maven.version>2.15.2</allure.maven.version> <!-- Для JUnit 5 лучше 2.15.2 -->
         <aspectj.version>1.9.21</aspectj.version>
     </properties>
 
@@ -31,11 +31,17 @@
             <version>${selenium.version}</version>
         </dependency>
 
-        <!-- JUnit 4 -->
+        <!-- JUnit 5 (Вместо JUnit 4) -->
         <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>${junit.version}</version>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-api</artifactId>
+            <version>${junit.jupiter.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-engine</artifactId>
+            <version>${junit.jupiter.version}</version>
             <scope>test</scope>
         </dependency>
 
@@ -62,15 +68,17 @@
             <scope>test</scope>
         </dependency>
 
-        <!-- Allure Framework -->
+        <!-- Allure Framework (JUnit 5) -->
         <dependency>
             <groupId>io.qameta.allure</groupId>
-            <artifactId>allure-junit4</artifactId>
+            <artifactId>allure-junit5</artifactId>
+            <version>${allure.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>io.qameta.allure</groupId>
             <artifactId>allure-rest-assured</artifactId>
+            <version>${allure.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -102,20 +110,23 @@
                 </configuration>
             </plugin>
 
-            <!-- Запуск тестов (Surefire) -->
+            <!-- Запуск тестов (Surefire) - версия 3.0+ обязательна для JUnit 5 -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>${surefire.plugin.version}</version>
                 <configuration>
                     <testFailureIgnore>false</testFailureIgnore>
+                    <!-- AspectJ для @Step -->
                     <argLine>
                         -javaagent:"${settings.localRepository}/org/aspectj/aspectjweaver/${aspectj.version}/aspectjweaver-${aspectj.version}.jar"
                     </argLine>
-                    <!-- Исправлено: использование современного синтаксиса вместо deprecated systemProperties -->
-                    <systemPropertyVariables>
-                        <allure.results.directory>${project.build.directory}/allure-results</allure.results.directory>
-                    </systemPropertyVariables>
+                    <systemProperties>
+                        <property>
+                            <name>allure.results.directory</name>
+                            <value>${project.build.directory}/allure-results</value>
+                        </property>
+                    </systemProperties>
                 </configuration>
                 <dependencies>
                     <dependency>

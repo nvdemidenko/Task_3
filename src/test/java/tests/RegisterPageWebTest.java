@@ -2,36 +2,39 @@ package tests;
 
 import driver.WebDrivers;
 import io.qameta.allure.Description;
-import io.qameta.allure.junit4.DisplayName;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.openqa.selenium.WebDriver;
 import pages.LoginPage;
 import pages.MainPage;
 import pages.RegisterPage;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
+// Подключаем Allure для JUnit 5
+@ExtendWith(io.qameta.allure.junit5.AllureJunit5.class)
 public class RegisterPageWebTest {
     private WebDriver driver;
     private String userEmail;
     private String browser = System.getProperty("browser", "chrome");
 
-    @Before
+    @BeforeEach
     public void setUp() {
         driver = WebDrivers.getDriver(browser);
         driver.manage().window().maximize();
     }
 
-    @After
+    @AfterEach
     public void tearDown() {
         if (driver != null) {
             driver.quit();
         }
     }
 
-    // --- ВСПОМОГАТЕЛЬНЫЙ МЕТОД (решение проблемы дублирования) ---
+    // --- ВСПОМОГАТЕЛЬНЫЙ МЕТОД ---
     private RegisterPage openRegisterPage() {
         MainPage mainPage = new MainPage(driver).open();
         LoginPage loginPage = mainPage.goToLogin();
@@ -50,8 +53,8 @@ public class RegisterPageWebTest {
         registerPage.fillRegisterForm("Тест", userEmail, "password123");
         registerPage.clickRegisterButton();
 
-        // После успешной регистрации мы должны оказаться на странице входа
-        assertTrue("Не произошел переход на страницу входа", registerPage.isLoginButtonDisplayed());
+        // ИСПРАВЛЕНО: сначала условие, потом сообщение
+        assertTrue(registerPage.isLoginButtonDisplayed(), "Не произошел переход на страницу входа");
     }
 
     @Test
@@ -64,6 +67,7 @@ public class RegisterPageWebTest {
         registerPage.fillRegisterForm("Тест", "test@yandex.ru", "123");
         registerPage.clickRegisterButton();
 
-        assertTrue("Не отображается ошибка некорректного пароля", registerPage.isInvalidPasswordErrorDisplayed());
+        // ИСПРАВЛЕНО: сначала условие, потом сообщение
+        assertTrue(registerPage.isInvalidPasswordErrorDisplayed(), "Не отображается ошибка некорректного пароля");
     }
 }

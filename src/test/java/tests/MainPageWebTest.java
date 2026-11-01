@@ -2,26 +2,29 @@ package tests;
 
 import driver.WebDrivers;
 import io.qameta.allure.Description;
-import io.qameta.allure.junit4.DisplayName;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openqa.selenium.WebDriver;
 import pages.MainPage;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
+// Allure для JUnit 5 (необходимо для @Step в PageObject)
+@ExtendWith(io.qameta.allure.junit5.AllureJunit5.class)
 public class MainPageWebTest {
     private WebDriver driver;
     private final String browser = System.getProperty("browser", "chrome");
 
-    @Before
+    @BeforeEach
     public void setUp() {
         driver = WebDrivers.getDriver(browser);
         driver.manage().window().maximize();
     }
 
-    @After
+    @AfterEach
     public void tearDown() {
         if (driver != null) {
             driver.quit();
@@ -33,9 +36,10 @@ public class MainPageWebTest {
     @Description("Проверка переключения вкладки конструктора на Соусы")
     public void shouldOpenSaucesTab() {
         MainPage mainPage = new MainPage(driver).open();
-        mainPage.openSaucesTab(); // Используем обновленное имя метода из PageObject
+        mainPage.openSaucesTab();
 
-        assertTrue("Вкладка 'Соусы' не стала активной", mainPage.isSaucesTabActive());
+        // ИСПРАВЛЕНО: assertTrue(условие, сообщение)
+        assertTrue(mainPage.isSaucesTabActive(), "Вкладка 'Соусы' не стала активной");
     }
 
     @Test
@@ -43,9 +47,9 @@ public class MainPageWebTest {
     @Description("Проверка переключения вкладки конструктора на Начинки")
     public void shouldOpenFillingsTab() {
         MainPage mainPage = new MainPage(driver).open();
-        mainPage.openFillingsTab(); // Используем обновленное имя метода из PageObject
+        mainPage.openFillingsTab();
 
-        assertTrue("Вкладка 'Начинки' не стала активной", mainPage.isFillingsTabActive());
+        assertTrue(mainPage.isFillingsTabActive(), "Вкладка 'Начинки' не стала активной");
     }
 
     @Test
@@ -53,9 +57,9 @@ public class MainPageWebTest {
     @Description("Проверка переключения вкладки конструктора на Булки после другой вкладки")
     public void shouldOpenBunsTab() {
         MainPage mainPage = new MainPage(driver).open();
-        mainPage.openSaucesTab(); // сначала переходим в соусы
-        mainPage.openBunsTab();   // возвращаемся на булки
+        mainPage.openSaucesTab();
+        mainPage.openBunsTab();
 
-        assertTrue("Вкладка 'Булки' не стала активной", mainPage.isBunsTabActive());
+        assertTrue(mainPage.isBunsTabActive(), "Вкладка 'Булки' не стала активной");
     }
 }
